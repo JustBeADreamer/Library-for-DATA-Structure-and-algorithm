@@ -81,6 +81,7 @@ void print_list(List_t* head);
 
 
 
+List_t* Search_f(List_t* root, int DATA);
 
 
 //READ, WRITE FUNCTIONS

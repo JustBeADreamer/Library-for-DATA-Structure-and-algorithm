@@ -169,6 +169,21 @@ void print_list(List_t* head){
         }
 }
 
+
+
+List_t* Search_f(List_t* root, int DATA){
+    List_t* cur=NULL;
+    cur=root;
+    while (cur!=NULL)
+    {
+        if(strcmp(cur->DATA, DATA)==0)
+            return cur;
+        cur=cur->next;
+    }
+    return cur;
+    
+}
+
 List_t* Write_to_file(List_t* head){
     List_t* cur;
     if((fp=fopen(filename, "wb"))==NULL){

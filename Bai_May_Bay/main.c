@@ -22,12 +22,60 @@ typedef struct queue_t{
 }Queue;
 
 
+int IsEmpty(Plane* head){
+    return head==NULL;
+}
+
+
+Plane *Make_new_node(int gate, char name[10], int servingtime, Queue* Q){
+    Plane* New;
+    New=(Plane*)malloc(sizeof(Plane));
+    if(New==NULL){
+        printf("Error for allocating memory!!!");
+        return NULL;
+    }
+    else
+        strcpy(New->name, name);
+        New->gate=gate+1;
+        New->servingtime=servingtime;
+        New->waitingtime=Q->totalwaitingtime;
+        New->next=NULL;
+    return New;
+}
+
+
+
+Plane* insertEnd(Plane* head, Plane* New){
+    Plane* cur=head;
+
+    if(IsEmpty(head)){
+        New->next=head;
+        head=New;
+        return head;
+    }
+    while(cur->next!=NULL){
+        cur=cur->next;
+    }
+    cur->next=New;
+    return head;
+ 
+}
+
+
+
+
+
+
+
+
+
 void Initialize(Queue* Q){
     Plane* head;
     head=(Plane*)malloc(sizeof(Plane));
     head->next=NULL;
     Q->rear=head;
     Q->front=head;
+    Q->totalwaitingtime=0;
 }
 
 
@@ -39,25 +87,6 @@ int Is_empty(Queue* Q){
 }
 
 
-void En_queue(int DATA, Queue* Q){
-    Q->rear->next=(Plane*)malloc(sizeof(Plane));
-    Q->rear=Q->rear->next;
-    Q->rear->next=NULL;
-    //Q->rear->DATA=DATA;
-}
-
-int* De_queue(int* DATA, Queue* Q){
-    if(Is_empty(Q))
-        printf("Queue is empty!!!\n");
-    else{
-        Plane* TEMP;
-        TEMP=Q->front;
-        Q->front=Q->front->next;
-        //*DATA=Q->front->DATA;
-        free(TEMP);
-        return DATA;
-    }
-}
 
 
 void Print(Queue* Q){
@@ -75,6 +104,53 @@ void Print(Queue* Q){
 }
 
 
+int Find_gate(Queue Q[]){
+    int MIN=INT_MAX;
+    int gate;
+    int i=0;
+    for(i=0;i<3;i++){
+        if(Q[i].totalwaitingtime<MIN){
+            MIN=Q[i].totalwaitingtime;
+            gate=i;
+        }
+    }
+    return gate;
+}
+
+
+void Input_queue(Queue* Q, int servingtime){
+    Q->totalwaitingtime+=servingtime;
+}
+
+
+void print_list(Plane* head){
+    Plane* cur;
+    if(IsEmpty(head))
+        printf("List_t empty!!!");
+
+    else{
+        cur=head;
+        printf("Name\tGate\tServing time\t Waiting time\n");
+        while(cur!=NULL){
+            printf("%s\t%d\t%d\t\t%d\n", cur->name, cur->gate, cur->servingtime, cur->waitingtime);
+            cur=cur->next;
+            }
+        }
+}
+
+
+Plane* Search(Plane* root, char name[10]){
+    Plane* cur=NULL;
+    cur=root;
+    while (cur!=NULL)
+    {
+        if(strcmp(cur->name, name)==0)
+            return cur;
+        cur=cur->next;
+    }
+    return cur;
+    
+}
 
 
 int main ()
@@ -82,10 +158,12 @@ int main ()
     Queue Q[3];
     int i=0;
     FILE* fp;
-    char name;
+    char name[10];
     int servingtime;
-
-
+    int gate=-1;
+    Queue* TEMP;
+    Plane* head=NULL;
+    Plane* cur=NULL;
 
     for(i=0;i<3;i++){
         Initialize(&Q[i]);
@@ -106,20 +184,30 @@ int main ()
 
             if(choice == 1) {
                 fp=fopen("gaterequest.txt", "r");
-                while(fscanf(fp, "%s %s", name, &servingtime)!=EOF){
-                    printf("%s %s", name, servingtime);
+                while(fscanf(fp, "%s %d", name, &servingtime)!=EOF){
+                    printf("%s %d\n", name, servingtime);
+                    gate=Find_gate(Q);
+                    TEMP=&Q[gate];
+                    head=insertEnd(head, Make_new_node(gate, name, servingtime, &Q[gate]));
+                    Input_queue(&Q[gate], servingtime);
                 }
-
-
-
-
                 fclose(fp);
             }
             else if(choice == 2) {
-                
+                print_list(head);
             }
             else if(choice == 3) {
-
+                printf("Input flight number: \n");
+                scanf("%s", name);
+                cur=Search(head, name);
+                if(cur==NULL)
+                    printf("Flight doesnt exist.\n");
+                else
+                {   
+                    printf("Name\tGate\tServingtime\twaitingtime\n");
+                    printf("%s\t%d\t%d\t\t%d", cur->name, cur->gate, cur->servingtime, cur->waitingtime);
+                }
+                
             }
             else if(choice == 4) {
 
